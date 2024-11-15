@@ -1,9 +1,9 @@
 <?php
 function getDbConnection() {
-    $servername = "localhost";
-    $username = "root";
+    $servername = "";
+    $username = "";
     $password = "";
-    $dbname = "morpion_db";
+    $dbname = "";
 
     try {
         $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
