@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Morpion Multijoueur</title>
+    <meta http-equiv="refresh" content="2">
+    <style>
+
+body {
+    background: linear-gradient(90deg, rgba(0,125,103,1) 0%, rgba(65,159,92,1) 100%);
+    color: white;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.left, .right {
+    width: 40%;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+}
+
+.left {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.title {
+    font-size: 90px;
+    margin-bottom: 20px;
+    font-family: 'Open Sans', sans-serif;
+    margin: 100px 0px 50px 0px;
+}
+
+.rules {
+    background-color: #fff;
+    border-radius: 40px;
+    color: #36995e;
+    padding: 50px;
+    font-size: 22px;
+    text-align: justify;
+    font-weight: bold;
+    width: 60%;
+}
+
+.grille {
+    display: grid;
+    grid-template-columns: repeat(3, 175px);
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.case {
+    width: 175px;
+    height: 175px;
+    border: 1px solid black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    cursor: pointer;
+}
+
+.case:disabled {
+    cursor: not-allowed;
+}
+
+.gagnant {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.spectateur {
+    color: red;
+}
+
+.reset-btn {
+    padding: 10px 20px;
+    margin-top: 20px;
+}
+
+.info {
+    margin: 20px 0;
+}
+
+.attente {
+    color: orange;
+}
+
+.egalite {
+    color: blue;
+}
+
+.action{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
+    width: 70%;
+}
+
+.action input{
+    width: 45%;
+    height: 50px;
+    border: solid 5px #ffffff;
+    background: #36995e;
+    border-radius: 50px;
+    padding: 10px;
+    font-size: 20px;
+    margin-right: 20px;
+    color: #ffffff;
+}
+
+.action button{
+    width: 45%;
+    height: 70px;
+    border: none;
+    background: #36995e;
+    border-radius: 50px;
+    padding: 10px;
+    font-size: 20px;
+    margin-right: 20px;
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <div class="title">MorpiGame</div>
+            <div class="rules">
+                Sur une grille carrée de 3 lignes et 3 colonnes. L'objectif est d'aligner 3 symboles identiques.<br><br>
+                Les deux joueurs doivent remplir, à tour de rôle, une case de la grille avec le symbole qui leur est attribué, généralement O et X.<br><br>
+                Celui qui aligne, le premier, 3 symboles identiques, a gagné.
+            </div>
+            <div class="action">
+                <input type="text" readonly value="{{gameId}}">
+                <button>Partager le lien du jeu</button>
+            </div>
+        </div>
+        <div class="right">
+            {{#playerCount}}
+    {{#isSpectateur}}
+        <p>Vous êtes spectateur ({{playerCount}} joueurs dans la partie)</p>
+    {{/isSpectateur}}
+    {{^isSpectateur}}
+        <p>{{playerCount}}/2 joueurs connectés</p>
+    {{/isSpectateur}}
+{{/playerCount}}
+            {{{renderStatus(game, winner, playerSymbol)}}}
+            {{{renderWaitingMessage(game)}}}
+            <form method="POST">
+                <div class="grille">
+    {{{gridHtml}}}
+</div>
+                {{#winner.or(game.status_equals_egalite)}}
+                <button class="reset-btn" type="submit" name="reset">Réinitialiser la partie</button>
+                {{/winner.or(game.status_equals_egalite)}}
+            </form>
+            {{{renderPlayerInfo(isSpectateur, playerSymbol)}}}
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const gameStatus = "{{game.status}}";
+        const isSpectator = {{isSpectateur}};
+        
+        if (gameStatus !== 'termine' && gameStatus !== 'egalite' && !isSpectator) {
+            setInterval(function() {
+                fetch(window.location.href)
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const newDoc = parser.parseFromString(html, 'text/html');
+                        const oldGrid = document.querySelector('.grille');
+                        const newGrid = newDoc.querySelector('.grille');
+                        if (oldGrid && newGrid) {
+                            oldGrid.innerHTML = newGrid.innerHTML;
+                        }
+                        const oldStatus = document.querySelector('h1');
+                        const newStatus = newDoc.querySelector('h1');
+                        if (oldStatus && newStatus) {
+                            oldStatus.innerHTML = newStatus.innerHTML;
+                        }
+                    });
+            }, 2000);
+        }
+    });
+</script>
+</body>
+</html>
