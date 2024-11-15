@@ -2,7 +2,6 @@
 function assignPlayer($gameId, $playerId) {
     $pdo = getDbConnection();
 
-    // Vérifier si le joueur existe déjà
     $stmt = $pdo->prepare("SELECT * FROM players WHERE id = ?");
     $stmt->execute([$playerId]);
     $player = $stmt->fetch();
@@ -11,7 +10,6 @@ function assignPlayer($gameId, $playerId) {
         return $player['symbol'];
     }
 
-    // Compter les joueurs existants
     $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM players WHERE game_id = ?");
     $stmt->execute([$gameId]);
     $playerCount = $stmt->fetchColumn();
@@ -23,14 +21,12 @@ function assignPlayer($gameId, $playerId) {
         $symbol = 'O';
         $status = 'en_cours';
         
-        // Mettre à jour le statut du jeu en 'en_cours'
         $stmt = $pdo->prepare("UPDATE games SET status = ?, active_player = 'X' WHERE id = ?");
         $stmt->execute(['en_cours', $gameId]);
     } else {
-        return null; // Spectateur
+        return null; 
     }
 
-    // Insérer le nouveau joueur
     $stmt = $pdo->prepare("INSERT INTO players (id, game_id, symbol) VALUES (?, ?, ?)");
     $stmt->execute([$playerId, $gameId, $symbol]);
 
@@ -57,19 +53,15 @@ function canPlay($gameId, $playerSymbol) {
     $stmt->execute([$gameId]);
     $game = $stmt->fetch();
 
-    // Si le jeu est terminé ou en égalité, personne ne peut jouer
     if ($game['status'] === 'termine' || $game['status'] === 'egalite') {
         return false;
     }
 
-    // Si le joueur est X et qu'on attend le joueur O
     if ($game['status'] === 'attente_joueur_o') {
         return $playerSymbol === 'X';
     }
 
-    // Si le jeu est en cours
     if ($game['status'] === 'en_cours') {
-        // Le joueur ne peut jouer que si c'est son tour
         return $game['active_player'] === $playerSymbol;
     }
 

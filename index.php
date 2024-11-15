@@ -76,14 +76,12 @@ if (checkVictory($grid, 'X')) {
 if (isset($_POST['reset']) && !$isSpectateur) {
     resetGame($gameId);
     $winner = null;
-    // Recharger la grille après réinitialisation
     $stmt = $pdo->prepare("SELECT * FROM games WHERE id = ?");
     $stmt->execute([$gameId]);
     $game = $stmt->fetch();
     $grid = json_decode($game['grid'], true);
 }
 
-// Générer le HTML de la grille avec les données actuelles
 $gridHtml = renderGrid($grid, $canPlay, $playerSymbol);
 
 $data = [

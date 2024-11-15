@@ -23,9 +23,6 @@ function renderGrid($grid, $canPlay, $playerSymbol) {
         $output .= '<div class="row">';
         for ($j = 0; $j < 3; $j++) {
             $cellValue = isset($grid[$i][$j]) ? $grid[$i][$j] : '';
-            // Une case est désactivée si :
-            // - la case est déjà occupée OU
-            // - le joueur ne peut pas jouer (ce n'est pas son tour ou il est spectateur)
             $isDisabled = ($cellValue !== null) || !$canPlay;
             $output .= sprintf(
                 '<button type="submit" class="case %s" name="position" value="%d,%d" %s>%s</button>',
